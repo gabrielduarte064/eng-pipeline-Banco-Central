@@ -1,0 +1,37 @@
+name: Pipeline diario de dados
+
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  rodar_pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o codigo do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Rodar o pipeline completo
+        run: python pipeline.py --etapa all
+
+      - name: Publicar o relatorio de qualidade como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-qualidade
+          path: data/gold/relatorio_qualidade.json
+
+      - name: Publicar o banco de dados gerado como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: warehouse
+          path: data/gold/warehouse.db
